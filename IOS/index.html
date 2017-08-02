@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" type="text/css" href="./style/index.css"/>
+	<link rel="stylesheet" type="text/css" href="style/animate.css"/>
+	<title>Document</title>
+</head>
+<body>
+	<div class="wrap" id="wrap">
+		<section class="wrap_time">
+			<p class="wrap_timer">
+				19:00
+			</p>
+			<p class="wrap_date">
+				<span class="mouth">10</span>月
+				<span class="day">20</span>日
+				<span class="getDay">星期四</span>
+			</p>
+		</section>
+		<section class="wrap_info animated">
+			<div>
+				<p class="info_top">微信</p>
+				<p class="info_txt">你收到一条邀请</p>
+				<p class="info_ent">滑动解锁查看信息</p>
+			</div>
+		</section>
+		
+		<section class="slideevent">
+			>滑动来解锁
+		</section>
+	</div>
+	<div class="cont">
+		<div class="wxbox" style="font-size: 1.6rem;">
+			请模拟IOS9系统版本中的iphone界面，场景设置如下：<br />
+			1.屏幕点亮 !！filter 模拟<br />
+			2.弹出微信消息提示框，并伴有声音提示 !! audio play<br />
+			3.向右划动屏幕，画面变暗。到达临界值之前松手则画面回弹至开始状态。  !!也可以变亮<br />
+			4.划动屏幕后进入微信对话界面。 ？？这里在move时做一个展现形式？<br />
+			end<br />
+			
+			
+			PS:页面细节如：时间实时显示更新，下方“滑动来解锁”动画等均应体现。<br />
+		</div>
+
+		<div class="wxbox" style="font-size: 1.6rem;">
+			微信
+			微信
+			微信
+			微信
+			微信
+			微信
+			微信
+			微信
+			微信
+			微信
+			微信
+		</div>
+	</div>
+	
+	<script src="./tools/jquery-2.1.0.js"></script>
+	<script>
+		
+			slideevent($('.slideevent'),$('#wrap'));/*touch事件 @param [1]=>事件绑定对象;[2]=>移动的对象*/
+			setInterval(timer,1000);timer();/*设置时间*/
+			randertest($('.wrap_info'));/*来信息  消息提醒的框子*/
+			setInterval(audioplay(),1000);
+
+
+			function audioplay(){
+				$('.wrap_info').show().addClass('bounceInLeft');
+				//  $('audio')[0].play();
+				//  $('<audio src="horse.ogg"></audio>').appendTo('body');
+			}
+			
+			
+			setInterval(function(){
+				var data = ["bounce", "shake"];
+				var idx;
+				$('.wrap_info').removeClass('bounceInLeft');
+				for(var i=0;i<data.length;i++){
+					idx = Math.round(Math.random()*i);
+				}
+				$('.wrap_info').addClass(data[idx]);
+				$('.wrap_info').show();
+				setTimeout(function(){
+					$('.wrap_info').removeClass(data[idx]);
+				},1000)
+			},2000)
+			
+			
+			function randertest($ele){
+				   var downT=0,timer;//滑动时间  拿来判断是否长时间拖动
+				   
+			       $ele.on('touchstart',function(e){
+			  			   timer=setInterval(function(){
+			  			   	 	downT +=1;
+			  			   },1000)
+			       });
+			       $ele.on('touchend',function(e){
+			  			   downT=0;
+			  			   clearInterval(timer);
+			  			   
+			       });
+			};
+			
+			function timer(){
+				var timer = new Date();
+				$('.wrap_timer').html(timer.getHours()+':'+timer.getMinutes());
+				$('.mouth').html(timer.getMonth()+1);
+				$('.day').html(timer.getDate());
+				$('.getDay').html('星期'+['一','二','三','四','五','六','日'][timer.getDay()-1]);
+				
+			}
+			/*
+				！myDate.getMonth();       //获取当前月份(0-11,0代表1月)
+				!myDate.getDay();         //获取当前星期X(0-6,0代表星期天)
+				!myDate.getHours();       //获取当前小时数(0-23)
+				!myDate.getMinutes();     //获取当前分钟数(0-59)
+			 * */
+			
+			function slideevent($ele,$move){
+				var startX,moveX,endX;//滑动位置
+				var startT,endT;//滑动时间  拿来判断是否长时间拖动 
+				var filterstyle =0; //再弄个明暗度
+				$ele.on('touchstart',function(e){
+					startX = e.originalEvent.touches["0"].pageX;
+					startT = e.timeStamp;
+					$move.removeClass('translateclass');
+				})
+				$ele.on('touchmove',function(e){
+					moveX = e.originalEvent.touches["0"].pageX;
+					$move.css('transform','translate3D('+(moveX-startX)/8+'%'+',0,0)');  //给拖拽做个小处理
+					filterstyle = Math.abs((moveX-startX)+400)/400; 
+//					需要一个0 - 1 的透明度值  减去距离得到的只能增加1.2 1.3 
+					if(filterstyle>1){  
+						filterstyle=((startX-moveX)+400)/400 ;
+					}else{
+						filterstyle = ((moveX-startX)+400)/400;
+					//这里控制明暗度  如果滑动变亮 换下else的位置
+					}
+					$move.css('-webkit-filter','brightness('+filterstyle+')');//来个亮度处理
+				})
+				$ele.on('touchend',function(e){
+					$move.addClass('translateclass');	//回弹的时候加translate 滑动去除
+					$move.css('-webkit-filter','brightness('+(1)+')');//来个亮度处理
+					endT = e.timeStamp;
+					endX = e.originalEvent.changedTouches["0"].pageX;
+					if(endT - startT >= 500){  //按压时间过长 不执行
+						$move.css('transform','translate3D(0,0,0)');
+						return ;
+					}
+					if(Math.abs(endX - startX )< $('body').width()/2){ //滑动距离不足 不执行
+						$move.css('transform','translate3D(0,0,0)');
+						return;
+					}
+					if(endX - startX >=0){   //左侧和右侧滑动
+						//left
+						$('.wxbox').eq(0).show().siblings().hide();
+						$move.css('transform','translate3D('+$move.width()+'px,0,0)');
+					}else{
+						//right
+						$('.wxbox').eq(1).show().siblings().hide();
+						$move.css('transform','translate3D('+-$move.width()+'px,0,0)');
+					}
+				});
+			};
+			
+	</script>
+</body>
+</html>
