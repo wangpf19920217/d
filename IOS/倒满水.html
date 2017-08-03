@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>donglanguage</title>
+	</head>
+
+	<body>
+
+		<div style="position:absolute;top:20px;left:10px;width:200px;height:550px;">
+			<div style="position:relative;top:200px;z-index:999">a 3L</div>
+			<div id="a" style="position:absolute;top:200px;width:100px;height:300px;background-color:white;border:1px solid blue">
+				<div id="water" style="position:relative;top:300px;height:0%;background-color:blue"></div>
+			</div>
+			<button name="fill" style="position:relative;top:520px">装满水</button>
+			<button name="empty" style="position:relative;top:520px">倒空水</button>
+			<button name="toFill" style="position:relative;top:520px">倒满水到另一个桶</button>
+		</div>
+
+		<div style="position:absolute;top:20px;left:220px;width:200px;height:550px;">
+			<div style="position:relative;top:0px;z-index:999">b 5L</div>
+			<div id="b" style="position:absolute;top:0px;width:100px;height:500px;background-color:white;border:1px solid blue">
+				<div style="position:relative;top:500px;height:0%;background-color:blue"></div>
+			</div>
+			<button name="fill" style="position:relative;top:520px">装满水</button>
+			<button name="empty" style="position:relative;top:520px">倒空水</button>
+			<button name="toFill" style="position:relative;top:520px">倒满水到另一个桶</button>
+		</div>
+
+		<div style="position:relative;top:10px;left:500px;">
+			问题：一个3L的桶，还有一个5L的桶，水无限。怎么操作才能准确地弄出4L的水？
+			<button id="a_solution">我不会，看看解法</button>
+		</div>
+		<div style="position:relative;left:500px;top:40px;">
+			<textarea id="program" rows="20" cols="50"></textarea>
+			<button id="run">运行</button>
+		</div>
+
+	</body>
+
+	<style></style>
+	<script>
+		//onload start
+		onload = function() {
+			$('#run').onclick = function() {
+				var code = $('#program').value;
+				run(code);
+			}
+
+			$('#a_solution').onclick = function() {
+				var program = 'a.empty()\nb.empty()\n\n' +
+					'b.fill()\nb.toFill(a)\na.empty()\nb.toFill(a)\nb.fill()\nb.toFill(a)';
+				$('#program').value = program;
+				run(program);
+			}
+
+			/*  解法提示
+			 a.empty()
+			b.empty()
+
+			a.fill()
+			a.toFill(b)
+			a.fill()
+			a.toFill(b)
+			b.empty()
+			a.toFill(b)
+			a.fill()
+			a.toFill(b)
+			a.fill()
+			 * 
+			 * */
+
+			function fillClick() {
+				run(this.parentNode.children[1].id + '.fill()');
+			}
+
+			function emptyClick() {
+				run(this.parentNode.children[1].id + '.empty()');
+			}
+
+			function toFillClick() {
+				var thisId = this.parentNode.children[1].id;
+				var from, to;
+				if(thisId == 'a') {
+					from = 'a';
+					to = 'b';
+				} else if(thisId == 'b') {
+					from = 'b';
+					to = 'a';
+				}
+				run(from + '.toFill(' + to + ')');
+			}
+
+			window.opBtns = $('button');
+			window.disableAllOpopBtns = function(b) {
+				for(var i = 0; i < opBtns.length; i++)
+					opBtns[i].disabled = b ? 'disabled' : '';
+			}
+
+			for(var i = 0; i < opBtns.length; i++) {
+				var btn = opBtns[i];
+				switch(btn.name) {
+					case 'fill':
+						btn.onclick = fillClick;
+						break;
+					case 'empty':
+						btn.onclick = emptyClick;
+						break;
+					case 'toFill':
+						btn.onclick = toFillClick;
+						break;
+				}
+			}
+
+			window.queue = false;
+			window.buckets = [$('#a'), $('#b')];
+
+		}; //onload end
+
+		function isEmpty(bucket) {
+			return parseInt(bucket.children[0].style.top) == parseInt(bucket.style.height);
+		}
+
+		function isFull(bucket) {
+			return parseInt(bucket.children[0].style.top) == 0;
+		}
+
+		function addWater(bucket, litre, zeroH, fullH) {
+			queue = false;
+			disableAllOpopBtns(true);
+			var water = bucket.children[0];
+			var timer = setInterval(function() {
+				if(litre == 0) {
+					clearInterval(timer);
+					disableAllOpopBtns(false);
+					if(zeroH)
+						zeroH();
+					queue = true;
+					return;
+				}
+				if(isFull(bucket)) {
+					clearInterval(timer);
+					disableAllOpopBtns(false);
+					if(fullH)
+						fullH();
+					queue = true;
+				}
+
+				var top = parseInt(water.style.top);
+				water.style.top = (top - 100) + 'px';
+				water.style.height = (parseInt(bucket.style.height) - (top - 100)) + 'px';
+				--litre;
+			}, 100);
+		}
+
+		function subWater(bucket, litre, zeroH, emptyH) {
+			queue = false;
+			disableAllOpopBtns(true);
+			var water = bucket.children[0];
+			var timer = setInterval(function() {
+				if(litre == 0) {
+					clearInterval(timer);
+					disableAllOpopBtns(false);
+					if(zeroH)
+						zeroH();
+					queue = true;
+					return;
+				}
+				if(isEmpty(bucket)) {
+					clearInterval(timer);
+					disableAllOpopBtns(false);
+					if(emptyH)
+						emptyH();
+					queue = true;
+					return;
+				}
+
+				var top = parseInt(water.style.top);
+				water.style.top = (top + 100) + 'px';
+				water.style.height = (parseInt(bucket.style.height) - (top + 100)) + 'px';
+				--litre;
+			}, 100);
+		}
+
+		function fill(bucket) {
+			addWater(bucket, parseInt(bucket.children[0].style.top) / 100);
+		}
+
+		function empty(bucket) {
+			subWater(bucket, parseInt(bucket.children[0].style.height) / 100);
+		}
+
+		function toFill(bucketFrom, bucketTo) {
+			queue = false;
+			disableAllOpopBtns(true);
+			var waterFrom = bucketFrom.children[0];
+			var waterTo = bucketTo.children[0];
+			var timer = setInterval(function() {
+				var waterFromTop = parseInt(waterFrom.style.top);
+				var waterFromHeight = parseInt(waterFrom.style.height);
+				var waterToTop = parseInt(waterTo.style.top);
+				var waterToHeight = parseInt(waterTo.style.height);
+
+				if(isFull(bucketTo) || isEmpty(bucketFrom)) {
+					clearInterval(timer);
+					disableAllOpopBtns(false);
+					queue = true;
+					return;
+				}
+				waterFrom.style.top = (waterFromTop + 100) + 'px';
+				waterFrom.style.height = (parseInt(bucketFrom.style.height) - (waterFromTop + 100)) + 'px';
+				waterTo.style.top = (waterToTop - 100) + 'px';
+				waterTo.style.height = (parseInt(bucketTo.style.height) - (waterToTop - 100)) + 'px';
+			}, 100);
+		}
+
+		var isOperator = function(c) {
+				return /[+\-*\/\^%=(),.]/.test(c);
+			},
+			isDigit = function(c) {
+				return /[0-9]/.test(c);
+			},
+			isWhiteSpace = function(c) {
+				return /\s/.test(c);
+			},
+			isIdentifier = function(c) {
+				return typeof c === "string" && !isOperator(c) && !isDigit(c) && !isWhiteSpace(c);
+			};
+
+		function lex(input) {
+			var tokens = [];
+			var c, i = 0;
+			var advance = function() {
+				return c = input[++i];
+			};
+			var addToken = function(type, value) {
+				tokens.push({
+					type: type,
+					value: value
+				});
+			};
+			while(i < input.length) {
+				c = input[i];
+				if(isWhiteSpace(c))
+					advance();
+				if(isIdentifier(c)) {
+					var id = c;
+					while(isIdentifier(advance())) id += c;
+					addToken("identifier", id);
+				} else if(isOperator(c)) {
+					addToken(c);
+					advance();
+				}
+			}
+			addToken('(end)');
+
+			return tokens;
+		}
+
+		function parse(tokens) {
+			var expression = function() {
+				var expression = {};
+				expression.type = 'call';
+				expression.args = [];
+				var argExpression = {};
+				expression.args.push(tokens[i]);
+				advance();
+				advance();
+				expression.name = tokens[i].value;
+				advance();
+				advance();
+				if(tokens[i].type == 'identifier') {
+					expression.args.push(tokens[i]);
+					advance();
+				}
+				advance();
+				return expression;
+			}
+
+			var parseTree = [];
+			var i = 0;
+			var advance = function() {
+				return tokens[++i];
+			};
+			while(tokens[i].type != '(end)') {
+				parseTree.push(expression());
+			}
+
+			return parseTree;
+
+		}
+
+		function evaluate(parseTree) {
+			var functions = {
+				'fill': fill,
+				'empty': empty,
+				'toFill': toFill
+			};
+
+			var variables = {
+				'a': buckets[0],
+				'b': buckets[1]
+			};
+
+			var parseNode = function(node) {
+				if(node.type == 'identifier') {
+					var value = variables[node.value];
+					return value;
+				}
+				if(node.type == 'call') {
+					var args = node.args;
+					for(var i = 0; i < args.length; i++)
+						args[i] = parseNode(args[i]);
+					return functions[node.name].apply(null, args);
+				}
+			}
+
+			var i = 0;
+			queue = true;
+			var timer = setInterval(function() {
+				if(queue) {
+					parseNode(parseTree[i]);
+					i++;
+					if(i >= parseTree.length) {
+						clearInterval(timer);
+					}
+				}
+			}, 0);
+
+		}
+
+		function run(code) {
+			try {
+				var tokens = lex(code);
+				var parseTree = parse(tokens);
+				return evaluate(parseTree);
+			} catch(e) {
+				return e;
+			}
+		}
+
+		function $(selector) {
+			var c = selector[0];
+			if(c == '#') {
+				var id = selector.substring(1);
+				return document.getElementById(id);
+			} else {
+				return document.getElementsByTagName(selector);
+			}
+		};
+	</script>
+
+	<!-- Generated by RunJS (Tue Apr 05 18:28:35 CST 2016) 2ms -->
