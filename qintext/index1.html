@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Document</title>
+		<style type="text/css">
+			*{
+				margin: 0 ;
+				padding: 0;
+			}
+			.qin_wrap {
+				height: 280px;
+			}
+			
+			.qin_wrap p {
+				position: relative;
+				display: block;
+				width: 100%;
+				height: 40px;
+			}
+			.qin_wrap p span{
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<div class="qin_wrap">
+			<p>我是文字我是文字我是文字我是文字我是文字</p>
+			<p>今天天气</p>
+			<p>每天插件</p>
+		</div>
+		<script src="js/jquery-1.11.0.js"></script>
+		<script>
+			
+			
+			
+			
+			function qin($ele){
+				var space=50,move=20,scope=6;
+				qineach($ele);//给文字套标签
+				qinposition($ele,space);						//给标签加样式
+				qinmove($ele,move,space,scope); //
+			}
+			
+			function qineach($ele){
+				var  $row = $ele.find('p');
+				$row.each(function(i,v){
+					var html=new Array();
+					for(var idx =0;idx<$(v).html().length;idx++){
+						html.push('<span>'+$(v).html().substr(idx,1)+'</span>');
+					};
+					$(this).html('').append(html);
+					html = '';
+				})
+			};
+			
+			function qinposition($ele,space){
+				var speed=space;
+				$ele.find('span').each(function(){
+					$(this).css({'position':'absolute','left':$(this).index()*speed});
+				})
+			}
+			
+			function qinmove($ele,move,space,scope){
+				var $elep = $ele.find('p'),idx;
+				
+				
+			$elep.on('mousemove',function(e){
+				var offset;
+				console.log($elep)
+				$elep.children("span").each(function (index) {
+	                var $span = $(this); // 当前span
+//	                $span.css({
+//	                    top: resultY + "px"
+//	                });
+	
+	            });
+			})	
+				
+//				$.each($elep, function() {
+//					$(this).on('mousemove',function(e){
+//						idx = Math.floor(e.pageX/space);//得到第几个字的索引
+//						$(this).find('span').animate({'top':move+'px'},300);
+//					})
+//					
+//					$(this).on('mousemove',function(e){
+//						$(this).find('span').animate({'top':e.offsetY+'px'},30);
+//					})	
+//				});
+			}
+			
+			
+			qin($('.qin_wrap'));
+			
+			
+		</script>
+	</body>
+

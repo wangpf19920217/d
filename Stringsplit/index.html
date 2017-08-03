@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<script>
+			//扩展 string.format
+		String.prototype.format = function () {
+		    var args = arguments;
+		    var reg = /\{(\d+)\}/g;
+		    return this.replace(reg, function (g0,g1) {
+		    	console.log(g0)
+		    	console.log(g1)
+		        return args[g1];
+		    });
+		};
+		//用法：
+		document.write("hello{0},我{1}岁了,今天星期{2};".format("张三",8,['一','二','三','四','五','六','日'][new Date().getDate()]));
+		//"hello tom,your age is 12,so tom's age is 12"
+		</script>
+	</body>
+</html>
