@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<div>
+	    	<p class="left">
+	    		<i class="grade_number"></i>
+	    		<span class="gradebox">
+	    			<a>
+	    				
+	    			</a>
+	    		</span>
+	    	</p>
+	    </div>
+	    展示0 - 10分 <br />
+	    小于1 不显示<br />
+	  大于9.5 全显示
+	    <div class="writebox">
+	    	<input value="" />
+	    	<b>随机</b>
+	    	<a style="cursor: pointer;">输入</a>
+	    	<br />
+	    </div>
+		<script src="jq.js"></script>
+		<script>
+			$('.writebox b').click(function(){
+				$('.grade_number').text((Math.random()*10).toFixed(1));  //刷新数据
+				$('.gradebox a').html('');
+				EvaluateAction($('.grade_number'),$('.gradebox'));
+				
+			})
+			$('.writebox a').click(function(){
+				var vul = $('.writebox input').val();
+				$('.grade_number').text(vul);  // 输入数据
+				$('.gradebox a').html('');
+				$('.writebox input').val('')
+				EvaluateAction($('.grade_number'),$('.gradebox'));
+			})
+			
+			
+			$('.grade_number').text((Math.random()*10).toFixed(1));  //测试数据
+			EvaluateAction($('.grade_number'),$('.gradebox'));
+			/*
+			 	parmes 
+			 		agr[0] 显示分数的元素 用来获取里面的分数
+			 		agr[1] 渲染的元素 通过dom找到a标签
+			 * */
+			function EvaluateAction(getNumEle,randerEle){
+				$(function(){
+					var randerNum = getNumEle.text()*10, //取整
+					randerText=(randerNum/20).toString(),		//渲染的个数
+					totel=5,
+					fullNumber = 9.5,  //这里可以设置五颗星的最大值  比如高于9.5就显示五颗星  
+					emptyNumber = 1,   //这里可以设置零颗星的最低值  比如低于1 就显示零颗星
+					elsedom;
+					if(getNumEle.text() >= fullNumber){  
+						for(var i=0;i<totel;i++){
+							randerEle.find('a').append('<img src="images/gradeall.png">');
+						};
+						return;
+					}
+					if(getNumEle.text() <= emptyNumber){  
+						for(var i=0;i<totel;i++){
+							randerEle.find('a').append('<img src="images/gradeempty.png">');
+						};
+						return;
+					}
+					if(randerText.indexOf('.') == -1){
+						for(var i=0;i<randerText;i++){
+							randerEle.find('a').append('<img src="images/gradeall.png">');
+						};
+					}else{
+						for(var x=0;x<randerText.substring(0,randerText.indexOf('.'));x++){
+							randerEle.find('a').append('<img src="images/gradeall.png">');
+						};
+					};
+					if(!randerText.substring(0,randerText.indexOf('.'))){  //判断中间值星
+						randerEle.find('a').append('<img src="images/gradeempty.png">');
+					}else{
+						randerEle.find('a').append('<img src="images/gradehalf.png">');
+					}
+					
+					if($('.gradebox a img').length == totel){return}; //总数不可大于5 
+					elsedom = totel-$('.gradebox a img').length; 	  //小于5则填充剩余的
+					for(var y=0;y<elsedom;y++){
+						randerEle.find('a').append('<img src="images/gradeempty.png">');
+					};
+				})
+			}
+		</script>
+	</body>
+</html>
