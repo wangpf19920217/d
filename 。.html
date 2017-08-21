@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<script>
+			var a={ 
+				valueOf: () => [1,2,3,4,5][i++]
+			},i=0;
+			
+			console.log(a==1 && a==2 && a==3 && a==4 && a==5) //true
+		</script>
+	</body>
+</html>
